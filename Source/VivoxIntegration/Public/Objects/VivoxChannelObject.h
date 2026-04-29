@@ -1,13 +1,14 @@
-// Fill out your copyright notice in the Description page of Project Settings.
+// Copyright (c) 2025 , SPD78. All rights reserved.
 
 #pragma once
 
 #include "CoreMinimal.h"
 #include "UObject/NoExportTypes.h"
 //Resource
-#include "VivoxIntegration/Resource/VivoxResource.h"
+#include "Resource/VivoxResource.h"
 //
 //Vivox
+
 #include "IClient.h"
 #include "VivoxCore.h"
 //
@@ -55,8 +56,17 @@ class VIVOXINTEGRATION_API UVivoxChannelObject : public UObject
 private:
 
 	IChannelSession* ChannelSession = nullptr;
+
+	//Channel property 
 	EVivoxChannelType CurrentChannelType;
 	FString CurrentChannelSessionId;
+
+	//Currently not using
+	bool bTransmittingAudio = false;
+	bool bListeningAudio = false;
+
+	//Participant 
+	IParticipant* CurrentParticipant;
 
 public:
 
@@ -74,7 +84,15 @@ public:
 	UFUNCTION(BlueprintPure, Category = "Vivox|VoiceChannel",BlueprintCosmetic)
 	ConnectionState GetChannelConnectionState();
 
-	void JoinChannel(FString ChannelId, EVivoxChannelType ChannelType, FOnVivoxChannelJoined OnChannelJoined);
+	/*
+	  Set the audio and transmission state for channel
+	  @param bListenAudio True to add audio, false to remove audio.
+	  @param bTransmitAudio When audio is added, transmit only into this channel. This overrides and changes the TransmissionMode set in ILoginSession. If transmission is specifically set to this channel, then when audio is removed, TransmissionMode changes to "None".
+	*/
+	UFUNCTION(BlueprintCallable, Category = "Vivox|VoiceChannel", meta = (Keywords = "Audio Listen Transmition"), BlueprintCosmetic)
+	void SetAudioConnected(bool bListenAudio=true,bool bTransmitAudio=true);
+
+	void JoinChannel(FString ChannelId, EVivoxChannelType ChannelType , FOnVivoxChannelJoined OnChannelJoined, bool bConnectAudio = true, bool bTransmitAudio = true);
 
 	/*
 	  Leaves the current channel and destroys the object (Use CreateAndJoinChannelVoiceChannel from VivoxSubSystem to join the same channel again) 
@@ -93,9 +111,14 @@ public:
 	/*
 	  Sets the position of player in 3d world space for positional channel
 	  @param position Actor Location
-	  @param ForwardVector Actor Forrward Vector
+	  @param ForwardVector Actor Forward Vector
 	  @param UpVector Actor UpVector
 	*/
-	UFUNCTION(BlueprintCallable, Category = "Vivox|VoiceChannel|Positional", BlueprintCosmetic)
+	UFUNCTION(BlueprintCallable, Category = "Vivox|VoiceChannel|Positional", meta = (Keywords = "Channel Position Location Transform"), BlueprintCosmetic)
 	void UpdateVivox3dPosition(const FVector& position, const FVector& ForwardVector, const FVector& UpVector);
+
+	//Used to check if currently speaking to channel or not 
+	UFUNCTION(BlueprintPure, Category = "Vivox|VoiceChannel")
+	bool IsSpeakingToChannel(double& AudioEnergy) const;
+
 };

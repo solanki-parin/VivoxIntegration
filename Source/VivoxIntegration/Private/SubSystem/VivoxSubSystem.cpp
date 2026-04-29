@@ -1,14 +1,14 @@
-// Fill out your copyright notice in the Description page of Project Settings.
+// Copyright (c) 2025 , SPD78. All rights reserved.
 
-#include "VivoxSubSystem.h"
-#include "VivoxIntegration/Library/VivoxHelperLibrary.h"
+#include "Subsystem/VivoxSubSystem.h"
+#include "Library/VivoxHelperLibrary.h"
 #include "Kismet/KismetMathLibrary.h"
 
 void UVivoxSubSystem::InitializeVivox()
 {
 	VivoxVoiceClient = &static_cast<FVivoxCoreModule*>(&FModuleManager::Get().LoadModuleChecked(TEXT("VivoxCore")))->VoiceClient();
 
-	if (VivoxVoiceClient)
+	if (VivoxVoiceClient != nullptr)
 	{
 		VivoxVoiceClient->Initialize();
 	}
@@ -21,8 +21,10 @@ void UVivoxSubSystem::InitializeVivox()
 void UVivoxSubSystem::UnInitializeVivox()
 {
 	Logout();
-	if (VivoxVoiceClient)
+	if (VivoxVoiceClient != nullptr)
+	{
 		VivoxVoiceClient->Uninitialize();
+	}
 	VivoxVoiceClient = nullptr;
 }
 
@@ -49,7 +51,7 @@ void UVivoxSubSystem::Login(FOnVivoxLoggedIn OnLogin)
 
 void UVivoxSubSystem::Logout()
 {
-	if (LoginSession)
+	if (LoginSession != nullptr)
 	{
 		{//Leaves from all the channels before logging out and clears the array
 
@@ -98,7 +100,7 @@ void UVivoxSubSystem::Logout()
 
 //Vivox Channel functions
 
-void UVivoxSubSystem::CreateAndJoinVoiceChannel(FString ChannelSessionId, EVivoxChannelType ChannelType, FOnVivoxChannelJoined OnChannelJoined, UVivoxChannelObject*& ChannelObject)
+void UVivoxSubSystem::CreateAndJoinVoiceChannel(FString ChannelSessionId, EVivoxChannelType ChannelType, FOnVivoxChannelJoined OnChannelJoined, UVivoxChannelObject*& ChannelObject , bool bConnectAudio, bool bTransmitAudio)
 {
 	check(ChannelSessionId != "" && Credentials.Domain != "" && Credentials.TokenIssuer != "" && Credentials.TokenKey != "");
 
@@ -111,12 +113,12 @@ void UVivoxSubSystem::CreateAndJoinVoiceChannel(FString ChannelSessionId, EVivox
 			if (PositionalChannels.Contains(ChannelSessionId))
 			{
 				VivoxChObj = PositionalChannels[ChannelSessionId];
-				VivoxChObj->JoinChannel(ChannelSessionId, ChannelType, OnChannelJoined);
+				VivoxChObj->JoinChannel(ChannelSessionId, ChannelType, OnChannelJoined, bConnectAudio, bTransmitAudio);
 			}
 			else
 			{
-				VivoxChObj = NewObject<UVivoxChannelObject>(this);
-				VivoxChObj->JoinChannel(ChannelSessionId, ChannelType, OnChannelJoined);
+				VivoxChObj = NewObject<UVivoxChannelObject>(GetGameInstance());
+				VivoxChObj->JoinChannel(ChannelSessionId, ChannelType, OnChannelJoined, bConnectAudio, bTransmitAudio);
 				PositionalChannels.Add(ChannelSessionId, VivoxChObj);
 			}
 			break;
@@ -124,12 +126,12 @@ void UVivoxSubSystem::CreateAndJoinVoiceChannel(FString ChannelSessionId, EVivox
 			if (NonPostionalChannels.Contains(ChannelSessionId))
 			{
 				VivoxChObj = NonPostionalChannels[ChannelSessionId];
-				VivoxChObj->JoinChannel(ChannelSessionId, ChannelType, OnChannelJoined);
+				VivoxChObj->JoinChannel(ChannelSessionId, ChannelType, OnChannelJoined, bConnectAudio, bTransmitAudio);
 			}
 			else
 			{
-				VivoxChObj = NewObject<UVivoxChannelObject>(this);
-				VivoxChObj->JoinChannel(ChannelSessionId, ChannelType, OnChannelJoined);
+				VivoxChObj = NewObject<UVivoxChannelObject>(GetGameInstance());
+				VivoxChObj->JoinChannel(ChannelSessionId, ChannelType, OnChannelJoined, bConnectAudio, bTransmitAudio);
 				NonPostionalChannels.Add(ChannelSessionId, VivoxChObj);
 			}
 			break;
@@ -137,12 +139,12 @@ void UVivoxSubSystem::CreateAndJoinVoiceChannel(FString ChannelSessionId, EVivox
 			if (EchoChannels.Contains(ChannelSessionId))
 			{
 				VivoxChObj = EchoChannels[ChannelSessionId];
-				VivoxChObj->JoinChannel(ChannelSessionId, ChannelType, OnChannelJoined);
+				VivoxChObj->JoinChannel(ChannelSessionId, ChannelType, OnChannelJoined, bConnectAudio, bTransmitAudio);
 			}
 			else
 			{
-				VivoxChObj = NewObject<UVivoxChannelObject>(this);
-				VivoxChObj->JoinChannel(ChannelSessionId, ChannelType, OnChannelJoined);
+				VivoxChObj = NewObject<UVivoxChannelObject>(GetGameInstance());
+				VivoxChObj->JoinChannel(ChannelSessionId, ChannelType, OnChannelJoined, bConnectAudio, bTransmitAudio);
 				EchoChannels.Add(ChannelSessionId, VivoxChObj);
 			}
 			break;
@@ -197,9 +199,9 @@ UVivoxChannelObject* UVivoxSubSystem::GetChannelOfType(EVivoxChannelType Channel
 
 void UVivoxSubSystem::SetOutputDeviceVoiceState(EVivoxDeviceVoiceStatus Status)
 {
-	if (VivoxVoiceClient)
+	if (VivoxVoiceClient != nullptr)
 	{
-		auto& Device = VivoxVoiceClient->AudioOutputDevices();
+		IAudioDevices& Device = VivoxVoiceClient->AudioOutputDevices();
 		switch (Status)
 		{
 		case EVivoxDeviceVoiceStatus::Mute:
@@ -221,9 +223,9 @@ void UVivoxSubSystem::SetOutputDeviceVoiceState(EVivoxDeviceVoiceStatus Status)
 
 void UVivoxSubSystem::SetInputDeviceVoiceState(EVivoxDeviceVoiceStatus Status)
 {
-	if (VivoxVoiceClient)
+	if (VivoxVoiceClient != nullptr)
 	{
-		auto& Device = VivoxVoiceClient->AudioInputDevices();
+		IAudioDevices& Device = VivoxVoiceClient->AudioInputDevices();
 		switch (Status)
 		{
 		case EVivoxDeviceVoiceStatus::Mute:
@@ -245,9 +247,9 @@ void UVivoxSubSystem::SetInputDeviceVoiceState(EVivoxDeviceVoiceStatus Status)
 
 EVivoxDeviceVoiceStatus UVivoxSubSystem::GetOutputDeviceVoiceState()
 {
-	if (VivoxVoiceClient)
+	if (VivoxVoiceClient != nullptr)
 	{
-		auto& Device = VivoxVoiceClient->AudioOutputDevices();
+		IAudioDevices& Device = VivoxVoiceClient->AudioOutputDevices();
 		return Device.Muted() ? EVivoxDeviceVoiceStatus::Mute : EVivoxDeviceVoiceStatus::UnMute;
 	}
 	else
@@ -259,9 +261,9 @@ EVivoxDeviceVoiceStatus UVivoxSubSystem::GetOutputDeviceVoiceState()
 
 EVivoxDeviceVoiceStatus UVivoxSubSystem::GetInputDeviceVoiceState()
 {
-	if (VivoxVoiceClient)
+	if (VivoxVoiceClient != nullptr)
 	{
-		auto& Device = VivoxVoiceClient->AudioInputDevices();
+		IAudioDevices& Device = VivoxVoiceClient->AudioInputDevices();
 		return Device.Muted() ? EVivoxDeviceVoiceStatus::Mute : EVivoxDeviceVoiceStatus::UnMute;
 	}
 	else
@@ -273,9 +275,9 @@ EVivoxDeviceVoiceStatus UVivoxSubSystem::GetInputDeviceVoiceState()
 
 void UVivoxSubSystem::SetOutputDeviceVolume(int32 Volume)
 {
-	if (VivoxVoiceClient)
+	if (VivoxVoiceClient != nullptr)
 	{
-		auto& Device = VivoxVoiceClient->AudioOutputDevices();
+		IAudioDevices& Device = VivoxVoiceClient->AudioOutputDevices();
 		Device.SetVolumeAdjustment(UKismetMathLibrary::MapRangeClamped(Volume, 0, 100, -50, 50));
 	}
 	else
@@ -286,9 +288,9 @@ void UVivoxSubSystem::SetOutputDeviceVolume(int32 Volume)
 
 void UVivoxSubSystem::SetInputDeviceVolume(int32 Volume)
 {
-	if (VivoxVoiceClient)
+	if (VivoxVoiceClient != nullptr)
 	{
-		auto& Device = VivoxVoiceClient->AudioInputDevices();
+		IAudioDevices& Device = VivoxVoiceClient->AudioInputDevices();
 		Device.SetVolumeAdjustment(UKismetMathLibrary::MapRangeClamped(Volume,0,100,-50,50));
 	}
 	else
@@ -299,9 +301,9 @@ void UVivoxSubSystem::SetInputDeviceVolume(int32 Volume)
 
 void UVivoxSubSystem::SetInputDeviceToNone()
 {
-	if (VivoxVoiceClient)
+	if (VivoxVoiceClient != nullptr)
 	{
-		auto& Device = VivoxVoiceClient->AudioInputDevices();
+		IAudioDevices& Device = VivoxVoiceClient->AudioInputDevices();
 		Device.SetActiveDevice(Device.NullDevice());
 	}
 	else
@@ -312,9 +314,9 @@ void UVivoxSubSystem::SetInputDeviceToNone()
 
 void UVivoxSubSystem::SetOutputDeviceToNone()
 {
-	if (VivoxVoiceClient)
+	if (VivoxVoiceClient != nullptr)
 	{
-		auto& Device = VivoxVoiceClient->AudioOutputDevices();
+		IAudioDevices& Device = VivoxVoiceClient->AudioOutputDevices();
 		Device.SetActiveDevice(Device.NullDevice());
 	}
 	else
@@ -325,9 +327,9 @@ void UVivoxSubSystem::SetOutputDeviceToNone()
 
 FAudioDeviceData UVivoxSubSystem::GetActiveInputDevice()
 {
-	if (VivoxVoiceClient)
+	if (VivoxVoiceClient != nullptr)
 	{
-		auto& Device = VivoxVoiceClient->AudioInputDevices();
+		IAudioDevices& Device = VivoxVoiceClient->AudioInputDevices();
 		Device.Refresh();
 		return FAudioDeviceData(Device.ActiveDevice().Name(), Device.ActiveDevice().Id());
 
@@ -341,9 +343,9 @@ FAudioDeviceData UVivoxSubSystem::GetActiveInputDevice()
 
 FAudioDeviceData UVivoxSubSystem::GetActiveOutputDevice()
 {
-	if (VivoxVoiceClient)
+	if (VivoxVoiceClient != nullptr)
 	{
-		auto& Device = VivoxVoiceClient->AudioOutputDevices();
+		IAudioDevices& Device = VivoxVoiceClient->AudioOutputDevices();
 		Device.Refresh();
 		return FAudioDeviceData(Device.ActiveDevice().Name(), Device.ActiveDevice().Id());
 
@@ -359,9 +361,9 @@ void UVivoxSubSystem::SetActiveInputDevice(FAudioDeviceData DeviceData)
 {
 	if (!DeviceData.IsEmpty())
 	{
-		if (VivoxVoiceClient)
+		if (VivoxVoiceClient != nullptr)
 		{
-			auto& Device = VivoxVoiceClient->AudioInputDevices();
+			IAudioDevices& Device = VivoxVoiceClient->AudioInputDevices();
 			Device.Refresh();
 			UVivoxAudioDevice InputDevice(DeviceData.Name, DeviceData.Id);
 			Device.SetActiveDevice(InputDevice);
@@ -380,9 +382,9 @@ void UVivoxSubSystem::SetActiveOutputDevice(FAudioDeviceData DeviceData)
 {
 	if (!DeviceData.IsEmpty())
 	{
-		if (VivoxVoiceClient)
+		if (VivoxVoiceClient != nullptr)
 		{
-			auto& Device = VivoxVoiceClient->AudioOutputDevices();
+			IAudioDevices& Device = VivoxVoiceClient->AudioOutputDevices();
 			Device.Refresh();
 			UVivoxAudioDevice OutputDevice(DeviceData.Name, DeviceData.Id);
 			Device.SetActiveDevice(OutputDevice);
@@ -398,9 +400,9 @@ void UVivoxSubSystem::SetActiveOutputDevice(FAudioDeviceData DeviceData)
 
 FAudioDeviceData UVivoxSubSystem::GetInputCommunicationDevice()
 {
-	if (VivoxVoiceClient)
+	if (VivoxVoiceClient != nullptr)
 	{
-		auto& Device = VivoxVoiceClient->AudioInputDevices();
+		IAudioDevices& Device = VivoxVoiceClient->AudioInputDevices();
 		Device.Refresh();
 		return FAudioDeviceData(Device.CommunicationDevice().Name(), Device.CommunicationDevice().Id());
 	}
@@ -413,9 +415,9 @@ FAudioDeviceData UVivoxSubSystem::GetInputCommunicationDevice()
 
 FAudioDeviceData UVivoxSubSystem::GetOutputCommunicationDevice()
 {
-	if (VivoxVoiceClient)
+	if (VivoxVoiceClient != nullptr)
 	{
-		auto& Device = VivoxVoiceClient->AudioOutputDevices();
+		IAudioDevices& Device = VivoxVoiceClient->AudioOutputDevices();
 		Device.Refresh();
 		return FAudioDeviceData(Device.CommunicationDevice().Name(), Device.CommunicationDevice().Id());
 	}
@@ -428,9 +430,9 @@ FAudioDeviceData UVivoxSubSystem::GetOutputCommunicationDevice()
 
 FAudioDeviceData UVivoxSubSystem::GetInputEffectiveDevice()
 {
-	if (VivoxVoiceClient)
+	if (VivoxVoiceClient != nullptr)
 	{
-		auto& Device = VivoxVoiceClient->AudioInputDevices();
+		IAudioDevices& Device = VivoxVoiceClient->AudioInputDevices();
 		Device.Refresh();
 		return FAudioDeviceData(Device.EffectiveDevice().Name(), Device.EffectiveDevice().Id());
 	}
@@ -443,9 +445,9 @@ FAudioDeviceData UVivoxSubSystem::GetInputEffectiveDevice()
 
 FAudioDeviceData UVivoxSubSystem::GetOutputEffectiveDevice()
 {
-	if (VivoxVoiceClient)
+	if (VivoxVoiceClient != nullptr)
 	{
-		auto& Device = VivoxVoiceClient->AudioOutputDevices();
+		IAudioDevices& Device = VivoxVoiceClient->AudioOutputDevices();
 		Device.Refresh();
 		return FAudioDeviceData(Device.EffectiveDevice().Name(), Device.EffectiveDevice().Id());
 	}
@@ -458,10 +460,10 @@ FAudioDeviceData UVivoxSubSystem::GetOutputEffectiveDevice()
 
 TMap<FString, FAudioDeviceData> UVivoxSubSystem::GetAvailableInputDevices()
 {
-	if (VivoxVoiceClient)
+	if (VivoxVoiceClient != nullptr)
 	{
 		TMap<FString, FAudioDeviceData> AvailableDeviceData;
-		auto& Device = VivoxVoiceClient->AudioInputDevices();
+		IAudioDevices& Device = VivoxVoiceClient->AudioInputDevices();
 		Device.Refresh();
 
 		const TMap<FString, IAudioDevice*>& SourceDevices = Device.AvailableDevices();
@@ -486,10 +488,10 @@ TMap<FString, FAudioDeviceData> UVivoxSubSystem::GetAvailableInputDevices()
 
 TMap<FString, FAudioDeviceData> UVivoxSubSystem::GetAvailableOutputDevices()
 {
-	if (VivoxVoiceClient)
+	if (VivoxVoiceClient != nullptr)
 	{
 		TMap<FString, FAudioDeviceData> AvailableDeviceData;
-		auto& Device = VivoxVoiceClient->AudioOutputDevices();
+		IAudioDevices& Device = VivoxVoiceClient->AudioOutputDevices();
 		Device.Refresh();
 
 		const TMap<FString, IAudioDevice*>& SourceDevices = Device.AvailableDevices();

@@ -1,23 +1,38 @@
-// Fill out your copyright notice in the Description page of Project Settings.
+// Copyright (c) 2025 , SPD78. All rights reserved.
 
 
-#include "VivoxChannelObject.h"
+#include "Objects/VivoxChannelObject.h"
 //VivoxSettings
-#include "VivoxIntegration/Public/VivoxSettings.h"
+#include "VivoxSettings.h"
 //
 //Subsytem
-#include "VivoxIntegration/Subsystem/VivoxSubSystem.h"
+#include "Subsystem/VivoxSubSystem.h"
 //
 #include "Kismet/KismetSystemLibrary.h"
 
 
-void UVivoxChannelObject::JoinChannel(FString ChannelSessionId, EVivoxChannelType ChannelType, FOnVivoxChannelJoined OnChannelJoined)
+void UVivoxChannelObject::SetAudioConnected(bool bListenAudio, bool bTransmitAudio)
 {
-	check(GetOuter());
+	if (ChannelSession != nullptr)
+	{
+		ChannelSession->BeginSetAudioConnected(bListenAudio, bTransmitAudio);
+		bTransmittingAudio = bTransmitAudio;
+		bListeningAudio = bListenAudio;
+	}
+}
 
-	UVivoxSubSystem* VivoxSubsystem = Cast<UVivoxSubSystem>(GetOuter());
+void UVivoxChannelObject::JoinChannel(FString ChannelSessionId, EVivoxChannelType ChannelType, FOnVivoxChannelJoined OnChannelJoined,bool bConnectAudio, bool bTransmitAudio)
+{
+	if (!(IsValid(GetOuter()) && GetOuter() != nullptr))
+		return;
 
-	check(VivoxSubsystem);
+	if (!Cast<UGameInstance>(GetOuter()))
+		return;
+
+	UVivoxSubSystem* VivoxSubsystem = Cast<UGameInstance>(GetOuter())->GetSubsystem<UVivoxSubSystem>();
+
+	if (!(IsValid(VivoxSubsystem) && VivoxSubsystem != nullptr))
+		return;
 
 	IChannelSession::FOnBeginConnectCompletedDelegate OnConnectionComplete;
 	OnConnectionComplete.BindLambda([this, OnChannelJoined](VivoxCoreError Error)
@@ -29,7 +44,7 @@ void UVivoxChannelObject::JoinChannel(FString ChannelSessionId, EVivoxChannelTyp
 	ChannelId Channel;
 	UVivoxSettings* Setting = GetMutableDefault<UVivoxSettings>();
 	Channel3DProperties PosChannelProperty = Channel3DProperties(Setting->AudibleDistance, Setting->ConversationalDistance,Setting->AudioFadeIntensityByDistance,StaticCast<EAudioFadeModel>(uint8(Setting->AudioModel)));
-
+	UE_LOG(LogVivox,Warning,TEXT("The vivox position settings are , Audible distance %f , Convers %f , fadeInt %f."), Setting->AudibleDistance, Setting->ConversationalDistance, Setting->AudioFadeIntensityByDistance);
 	CurrentChannelType = ChannelType;
 	switch (ChannelType)
 	{
@@ -48,8 +63,26 @@ void UVivoxChannelObject::JoinChannel(FString ChannelSessionId, EVivoxChannelTyp
 	}
 	ChannelSession = &VivoxSubsystem->LoginSession->GetChannelSession(Channel);
 	FString JoinToken = ChannelSession->GetConnectToken(VivoxSubsystem->GetVivoxCredentials().TokenKey, FTimespan::FromSeconds(180));
-	ChannelSession->BeginConnect(true, false, true, JoinToken, OnConnectionComplete);
+	ChannelSession->BeginConnect(bConnectAudio, false, bTransmitAudio, JoinToken, OnConnectionComplete);
+	
+	//No need for this in plugin here either make it somewhere else 
+
+	ChannelSession->EventAfterParticipantAdded.AddLambda([this](const IParticipant& Participant)
+		{
+			UE_LOG(LogTemp, Log, TEXT("Participant added: %s"),
+				*FString(Participant.Account().Name()));
+
+			if (Participant.IsSelf())
+			{
+				UE_LOG(LogTemp, Log, TEXT("Local participant detected"));
+				CurrentParticipant = const_cast<IParticipant*>(&Participant); // store pointer for later
+			}
+		});
+
+	bTransmittingAudio = bTransmitAudio;
+	bListeningAudio = bConnectAudio;
 	CurrentChannelSessionId = ChannelSessionId;
+	
 }
 
 ChannelId UVivoxChannelObject::GetChannel()
@@ -85,11 +118,16 @@ ConnectionState UVivoxChannelObject::GetChannelConnectionState()
 
 void UVivoxChannelObject::LeaveChannel()
 {
-	check(GetOuter());
+	if (!(IsValid(GetOuter()) && GetOuter()!=nullptr))
+		return;
 
-	UVivoxSubSystem* VivoxSubsystem = Cast<UVivoxSubSystem>(GetOuter());
+	if (!Cast<UGameInstance>(GetOuter()))
+		return;
 
-	check(VivoxSubsystem);
+	UVivoxSubSystem* VivoxSubsystem = Cast<UGameInstance>(GetOuter())->GetSubsystem<UVivoxSubSystem>();
+
+	if (!(IsValid(VivoxSubsystem) && VivoxSubsystem != nullptr))
+		return;
 
 	const FString* Key;
 	switch (CurrentChannelType)
@@ -145,19 +183,47 @@ void UVivoxChannelObject::Clear3DValuesAreDirty()
 
 void UVivoxChannelObject::UpdateVivox3dPosition(const FVector& position, const FVector& ForwardVector, const FVector& UpVector)
 {
-	if (ChannelSession != nullptr && ChannelSession)
+	if (ChannelSession != nullptr)
 	{
-		CachedPosition.SetValue(position);
-		CachedForwardVector.SetValue(ForwardVector);
-		CachedUpVector.SetValue(UpVector);
-		if (!Get3DValuesAreDirty())
-			return;
-		ChannelSession->Set3DPosition(CachedPosition.GetValue(), CachedPosition.GetValue(), CachedForwardVector.GetValue(), CachedUpVector.GetValue());
-		Clear3DValuesAreDirty();
-		
+	 	auto AudioState = ChannelSession->AudioState();
+		switch (AudioState)
+		{
+		case ConnectionState::Disconnected:
+			UE_LOG(LogVivox, Warning, TEXT("Audio is not connected , cannot change position of speaker in 3d space"));
+			break;
+		case ConnectionState::Connecting:
+			UE_LOG(LogVivox, Warning, TEXT("Audio is connecting , cannot change 3d postion for now"));
+			break;
+		case ConnectionState::Connected:
+			CachedPosition.SetValue(position);
+			CachedForwardVector.SetValue(ForwardVector);
+			CachedUpVector.SetValue(UpVector);
+			if (!Get3DValuesAreDirty())
+				return;
+			ChannelSession->Set3DPosition(CachedPosition.GetValue(), CachedPosition.GetValue(), CachedForwardVector.GetValue(), CachedUpVector.GetValue());
+			Clear3DValuesAreDirty();
+			break;
+		case ConnectionState::Disconnecting:
+			UE_LOG(LogVivox, Warning, TEXT("Cannot change 3d position the audio is disconnecting"));
+			break;
+		default:
+			break;
+		}	
 	}
 	else
 	{
 		UE_LOG(LogVivox, Error, TEXT("Channel Session is not valid cannot change position"));
 	}
 }
+
+bool UVivoxChannelObject::IsSpeakingToChannel(double& AudioEnergy) const
+{
+	if (CurrentParticipant != nullptr)
+	{
+		AudioEnergy = CurrentParticipant->AudioEnergy();
+		return CurrentParticipant->SpeechDetected();
+	}
+	AudioEnergy = 0.0f;
+	return false;
+}
+

@@ -1,4 +1,4 @@
-// Copyright Epic Games, Inc. All Rights Reserved.
+// Copyright (c) 2025 , SPD78. All rights reserved.
 
 using UnrealBuildTool;
 
@@ -10,14 +10,12 @@ public class VivoxIntegration : ModuleRules
 		
 		PublicIncludePaths.AddRange(
 			new string[] {
-				// ... add public include paths required here ...
 			}
 			);
 				
 		
 		PrivateIncludePaths.AddRange(
 			new string[] {
-				// ... add other private include paths required here ...
 			}
 			);
 			
@@ -26,7 +24,7 @@ public class VivoxIntegration : ModuleRules
 			new string[]
 			{
 				"Core",
-				"VivoxCore"// ... add other public dependencies that you statically link with here ...
+				"VivoxCore"
 			}
 			);
 			
@@ -37,8 +35,7 @@ public class VivoxIntegration : ModuleRules
 				"CoreUObject",
 				"Engine",
 				"Slate",
-				"SlateCore",
-				// ... add private dependencies that you statically link with here ...	
+				"SlateCore"
 			}
 			);
 		
@@ -46,7 +43,6 @@ public class VivoxIntegration : ModuleRules
 		DynamicallyLoadedModuleNames.AddRange(
 			new string[]
 			{
-				// ... add any modules that your module loads dynamically here ...
 			}
 			);
 	}

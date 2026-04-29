@@ -1,14 +1,14 @@
-// Fill out your copyright notice in the Description page of Project Settings.
+// Copyright (c) 2025 , SPD78. All rights reserved.
 
 #pragma once
 
 #include "CoreMinimal.h"
 #include "Subsystems/GameInstanceSubsystem.h"
 //Objects
-#include "VivoxIntegration/Objects/VivoxChannelObject.h"
+#include "Objects/VivoxChannelObject.h"
 //
 //Resource
-#include "VivoxIntegration/Resource/VivoxResource.h"
+#include "Resource/VivoxResource.h"
 //
 //Vivox
 #include "IClient.h"
@@ -31,10 +31,12 @@ private:
 public:
 
 	//VivoxBasePropertySet
+
 	IClient* VivoxVoiceClient;
 	AccountId LoggedInUserId;
 
 	//VivoxLoginPropertySet
+
 	bool bIsLoggedIn = false;
 	ILoginSession* LoginSession = nullptr;
 
@@ -49,19 +51,19 @@ public:
 	//Credentials
 
 	/*
-	  Sets vivox credentials , make sure to provide proper credentials otherwise vivox will not work
+	  Sets vivox credentials , make sure to provide proper credentials before doing other vivox operation otherwise vivox will not work
 	  @param VivoxCredentials Vivox Credentials
 	*/
-	UFUNCTION(BlueprintCallable, Category = "Vivox|Credentials")
+	UFUNCTION(BlueprintCallable, Category = "Vivox|Credentials", BlueprintCosmetic)
 	void SetVivoxCredentials(const FVivoxCredentials& VivoxCredentials)
 	{
 		Credentials = VivoxCredentials;
 	}
 
 	/*
-	  Gets creadentials of vivox integration
+	  Gets credentials of vivox integration
 	*/
-	UFUNCTION(BlueprintPure, Category = "Vivox|Credentials")
+	UFUNCTION(BlueprintPure, Category = "Vivox|Credentials", BlueprintCosmetic)
 	FVivoxCredentials GetVivoxCredentials() const
 	{ 
 		return Credentials;
@@ -99,14 +101,16 @@ public:
 	//Vivox Channel Functions
 	
 	/*
-	  Creates and join the voice channel with specific ChannelSessionId 
+	  Creates and join the voice channel with specific ChannelSessionId and ChannelType
 	  @param ChannelSessionId Channel Id to identify Voice channel
 	  @param ChannelType Voice Channel Type
 	  @param OnChannelJoined Callback event for Voice Channel Creation activity
 	  @param ChannelObject Channel object created using Channel Id
+	  @param bConnectAudio if true Player can listen from the channel , if false Player cannot listen from the channel
+	  @param bTransmitAudio if true Player can speak in the channel , if false Player cannot speak in the channel it can only hear from it if ConnectAudio is true
 	*/
 	UFUNCTION(BlueprintCallable, Category = "Vivox|VoiceChannel", BlueprintCosmetic)
-	void CreateAndJoinVoiceChannel(FString ChannelSessionId, EVivoxChannelType ChannelType, FOnVivoxChannelJoined OnChannelJoined, UVivoxChannelObject*& ChannelObject);
+	void CreateAndJoinVoiceChannel(FString ChannelSessionId, EVivoxChannelType ChannelType, FOnVivoxChannelJoined OnChannelJoined, UVivoxChannelObject*& ChannelObject, bool bConnectAudio = true, bool bTransmitAudio = true);
 
 	/*
 	  Gets all voice channel of specific type

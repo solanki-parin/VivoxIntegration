@@ -1,4 +1,4 @@
-// Copyright Epic Games, Inc. All Rights Reserved.
+// Copyright (c) 2025 , SPD78. All rights reserved.
 
 #pragma once
 

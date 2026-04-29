@@ -1,4 +1,4 @@
-// Fill out your copyright notice in the Description page of Project Settings.
+// Copyright (c) 2025 , SPD78. All rights reserved.
 
 #pragma once
 
@@ -10,6 +10,7 @@
 DECLARE_LOG_CATEGORY_EXTERN(LogVivox, Log, All);
 //
 
+DECLARE_DYNAMIC_DELEGATE(FOnSetAudioConnectedCompleted);
 DECLARE_DYNAMIC_DELEGATE_OneParam(FOnVivoxLoggedIn , bool,bLoginSuccessfull);
 DECLARE_DYNAMIC_DELEGATE_OneParam(FOnVivoxChannelJoined, bool, bJoinSuccessfull);
 

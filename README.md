@@ -267,7 +267,7 @@ Stops audio capture.
 
 Stops audio playback.
 
-![Device](Resources/SetOutputDeviceToNone.png)
+![Device](Resources/SetOutputDevicetoNone.png)
 
 ---
 

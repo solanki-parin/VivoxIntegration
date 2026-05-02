@@ -1,6 +1,6 @@
-# 🎤 Vivox Voice Integration
+# Vivox Voice Integration
 
-A **client-side voice communication system** built using the Vivox SDK for Unreal Engine 5.
+A **client side voice communication system** built using the Vivox SDK for Unreal Engine 5.
 
 This system provides a structured and extensible way to manage:
 
@@ -11,16 +11,21 @@ This system provides a structured and extensible way to manage:
 
 ---
 
-## 📖 Overview
+## Overview
 
 This implementation wraps the Vivox SDK into a **UGameInstanceSubsystem** (`UVivoxSubSystem`) and **channel-level UObject abstraction** (`UVivoxChannelObject`).
 
 It is designed for:
 
 * Clean Blueprint integration
-* Multi-channel voice support
+* Multi channel voice support
 * Positional voice support (3D audio)
-* Full device control
+
+**Note**
+
+* Settings for positional channel are inside plugin setting (ProjectSettings → Plugins → Vivox)  
+
+![Channel](Resources/PositionalChannelSetting.png)
 
 ---
 
@@ -351,7 +356,7 @@ Returns all detected output devices.
 
 Listen only mode (no speaking).
 
-![Transmission](Resources/SetTransmissionToNone.png)
+![Transmission](Resources/SetTransmissiontoNone.png)
 
 ---
 
@@ -359,7 +364,7 @@ Listen only mode (no speaking).
 
 Transmit only to one channel(provided channel).
 
-![Transmission](Resources/SetTransmissionToSingleChannel.png)
+![Transmission](Resources/SetTransmissiontoSingleChannel.png)
 
 ---
 
@@ -367,7 +372,7 @@ Transmit only to one channel(provided channel).
 
 Transmit to all joined channels.
 
-![Transmission](Resources/SetTransmissionToAll.png)
+![Transmission](Resources/SetTransmissiontoAll.png)
 
 ---
 
@@ -437,7 +442,7 @@ void UpdateVivox3dPosition(
 );
 ```
 
-Updates 3D spatial position for positional channels.
+Updates 3D spatial position for positional channel.
 
 **Usage**
 
@@ -454,5 +459,5 @@ Updates 3D spatial position for positional channels.
 
 Checks if user is currently speaking.
 
-![Channel](Resources/IsSpeakingToChannel.png)
+![Channel](Resources/IsSpeakingtoChannel.png)
 

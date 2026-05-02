@@ -211,11 +211,15 @@ Creates and joins a voice channel.
 
 Mute / unmute output (speaker).
 
+![Device](Resources/SetOutputDeviceVoiceState.png)
+
 ---
 
 ### `SetInputDeviceVoiceState(EVivoxDeviceVoiceStatus Status)`
 
 Mute / unmute input (microphone).
+
+![Device](Resources/SetInputDeviceVoiceState.png)
 
 ---
 

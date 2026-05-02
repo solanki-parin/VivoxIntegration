@@ -13,7 +13,7 @@ This system provides a structured and extensible way to manage:
 
 ## Overview
 
-This implementation wraps the Vivox SDK into a **UGameInstanceSubsystem** (`UVivoxSubSystem`) and **channel-level UObject abstraction** (`UVivoxChannelObject`).
+This implementation wraps the Vivox SDK into a **UGameInstanceSubsystem** (`UVivoxSubSystem`) and **channel level UObject abstraction** (`UVivoxChannelObject`).
 
 It is designed for:
 
@@ -29,7 +29,7 @@ It is designed for:
 
 ---
 
-## 🧱 Architecture
+## Architecture
 
 ```
 GameInstance
@@ -47,9 +47,9 @@ GameInstance
 
 ---
 
-# 🔷 UVivoxSubSystem
+# UVivoxSubSystem
 
-## 📌 Responsibility
+## Responsibility
 
 Central controller for:
 
@@ -63,7 +63,7 @@ Central controller for:
 
 ---
 
-## 🔑 Credentials
+## Credentials
 
 ### `SetVivoxCredentials(FVivoxCredentials VivoxCredentials)`
 
@@ -86,7 +86,7 @@ Sets required Vivox credentials.
 
 ---
 
-## ⚙️ Core Functions
+## Core Functions
 
 ### `InitializeVivox()`
 
@@ -112,7 +112,7 @@ Shuts down Vivox, releases resources and disconnectes from all changes and logs 
 
 ---
 
-## 🔐 Login System
+## Login System
 
 ### `Login(FString PlayerName,FOnVivoxLoggedIn OnLogin)`
 
@@ -143,7 +143,7 @@ Logs out from Vivox and clears session state.
 
 ---
 
-# 🔊 Channel Management
+# Channel Management
 
 ---
 
@@ -204,7 +204,7 @@ Creates and joins a voice channel.
 
 ---
 
-# 🎧 Device Management
+# Device Management
 
 ### `SetOutputDeviceVoiceState(EVivoxDeviceVoiceStatus Status)`
 
@@ -350,7 +350,7 @@ Returns all detected output devices.
 
 ---
 
-# 🎙️ Transmission Control
+# Transmission Control
 
 ### `SetTransmissionToNone()`
 
@@ -376,9 +376,9 @@ Transmit to all joined channels.
 
 ---
 
-# 🔷 UVivoxChannelObject
+# UVivoxChannelObject
 
-## 📌 Responsibility
+## Responsibility
 
 Represents a **single voice channel instance**.
 
@@ -391,7 +391,7 @@ Handles:
 
 ---
 
-## 🔑 Core Functions
+## Core Functions
 
 ### `GetChannelSessionId()`
 
@@ -430,7 +430,7 @@ Leaves channel and destroys object.
 
 ---
 
-# 🌍 Positional Voice (3D Audio)
+# Positional Voice (3D Audio)
 
 ### `UpdateVivox3dPosition(...)`
 
@@ -453,7 +453,7 @@ Updates 3D spatial position for positional channel.
 
 ---
 
-# 🗣️ Speaking Detection
+# Speaking Detection
 
 ### `IsSpeakingToChannel(double& AudioEnergy)`
 

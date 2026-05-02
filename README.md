@@ -1,4 +1,4 @@
-# 🎤 Vivox Voice Integration (UE5 – Client Side)
+# 🎤 Vivox Voice Integration
 
 A **client-side voice communication system** built using the Vivox SDK for Unreal Engine 5.
 
@@ -83,8 +83,6 @@ Sets required Vivox credentials.
 
 ## ⚙️ Core Functions
 
----
-
 ### `InitializeVivox()`
 
 Initializes the Vivox client and internal systems.
@@ -110,8 +108,6 @@ Shuts down Vivox, releases resources and disconnectes from all changes and logs 
 ---
 
 ## 🔐 Login System
-
----
 
 ### `Login(FString PlayerName,FOnVivoxLoggedIn OnLogin)`
 
@@ -185,10 +181,10 @@ Creates and joins a voice channel.
 
 * Gets all channel of provided type
 
+![Channel](Resources/GetAllChannelOfType.png)
+
 **Returns**
 `TArray<UVivoxChannelObject*>`
-
-![Channel](Resources/GetAllChannelOfType.png)
 
 ---
 
@@ -196,16 +192,14 @@ Creates and joins a voice channel.
 
 * Gets channel of provided type based on ChannelSessionId (Will return null if channel of type contaning provided ChannelSessionId is not present)
 
+![Channel](Resources/GetChannelOfType.png)
+
 **Returns**
 `UVivoxChannelObject*`
-
-![Channel](Resources/GetChannelOfType.png)
 
 ---
 
 # 🎧 Device Management
-
----
 
 ### `SetOutputDeviceVoiceState(EVivoxDeviceVoiceStatus Status)`
 
@@ -353,8 +347,6 @@ Returns all detected output devices.
 
 # 🎙️ Transmission Control
 
----
-
 ### `SetTransmissionToNone()`
 
 Listen only mode (no speaking).
@@ -396,8 +388,6 @@ Handles:
 
 ## 🔑 Core Functions
 
----
-
 ### `GetChannelSessionId()`
 
 ![Channel](Resources/GetChannelSessionId.png)
@@ -437,8 +427,6 @@ Leaves channel and destroys object.
 
 # 🌍 Positional Voice (3D Audio)
 
----
-
 ### `UpdateVivox3dPosition(...)`
 
 ```cpp
@@ -449,7 +437,6 @@ void UpdateVivox3dPosition(
 );
 ```
 
-**Description**
 Updates 3D spatial position for positional channels.
 
 **Usage**
@@ -462,8 +449,6 @@ Updates 3D spatial position for positional channels.
 ---
 
 # 🗣️ Speaking Detection
-
----
 
 ### `IsSpeakingToChannel(double& AudioEnergy)`
 

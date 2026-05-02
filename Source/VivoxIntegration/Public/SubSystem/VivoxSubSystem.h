@@ -63,7 +63,7 @@ public:
 	/*
 	  Gets credentials of vivox integration
 	*/
-	UFUNCTION(BlueprintPure, Category = "Vivox|Credentials", BlueprintCosmetic)
+	UFUNCTION(BlueprintPure, meta = (ReturnDisplayName = "Credentials"),Category = "Vivox|Credentials", BlueprintCosmetic)
 	FVivoxCredentials GetVivoxCredentials() const
 	{ 
 		return Credentials;
@@ -90,7 +90,7 @@ public:
 	  @param OnLogin Callaback event for login activity
 	*/
 	UFUNCTION(BlueprintCallable, Category = "Vivox", BlueprintCosmetic)
-	void Login(FOnVivoxLoggedIn OnLogin);
+	void Login(FString PlayerName,FOnVivoxLoggedIn OnLogin);
 
 	/*
 	  Logout from the vivox server
@@ -116,7 +116,7 @@ public:
 	  Gets all voice channel of specific type
 	  @param ChannelType Voice Channel Type
 	*/
-	UFUNCTION(BlueprintPure, Category = "Vivox|VoiceChannel", BlueprintCosmetic)
+	UFUNCTION(BlueprintPure, meta = (ReturnDisplayName = "VoiceChannels"),Category = "Vivox|VoiceChannel", BlueprintCosmetic)
 	TArray<UVivoxChannelObject*> GetAllChannelOfType(EVivoxChannelType ChannelType) const;
 
 	/*
@@ -124,7 +124,7 @@ public:
 	  @param ChannelType Voice Channel Type
 	  @param ChannelSessionId Channel Id
 	*/
-	UFUNCTION(BlueprintPure, Category = "Vivox|VoiceChannel", BlueprintCosmetic)
+	UFUNCTION(BlueprintPure, meta = (ReturnDisplayName = "VoiceChannel"),Category = "Vivox|VoiceChannel", BlueprintCosmetic)
 	UVivoxChannelObject* GetChannelOfType(EVivoxChannelType ChannelType ,FString ChannelSessionId) const;
 
 	//Vivox Device functions
@@ -146,13 +146,13 @@ public:
 	/*
 	  Gets state of output device used by vivox
 	*/
-	UFUNCTION(BlueprintPure, Category = "Vivox|Device", meta = (Keywords = "Mute Unmute Voice"), BlueprintCosmetic)
+	UFUNCTION(BlueprintPure, Category = "Vivox|Device", meta = (Keywords = "Mute Unmute Voice" ,ReturnDisplayName = "VoiceState"), BlueprintCosmetic)
 	EVivoxDeviceVoiceStatus GetOutputDeviceVoiceState();
 
 	/*
 	  Gets state of input device used by vivox
 	*/
-	UFUNCTION(BlueprintPure, Category = "Vivox|Device", meta = (Keywords = "Mute Unmute Voice"), BlueprintCosmetic)
+	UFUNCTION(BlueprintPure, Category = "Vivox|Device", meta = (Keywords = "Mute Unmute Voice", ReturnDisplayName = "VoiceState"), BlueprintCosmetic)
 	EVivoxDeviceVoiceStatus GetInputDeviceVoiceState();
 
 
@@ -186,13 +186,13 @@ public:
 	/*
 	 Gets Current Active Input device 
 	*/
-	UFUNCTION(BlueprintPure, Category = "Vivox|Device", meta = (Keywords = "Input Device"), BlueprintCosmetic)
+	UFUNCTION(BlueprintPure, Category = "Vivox|Device", meta = (Keywords = "Input Device", ReturnDisplayName = "AudioDevice"), BlueprintCosmetic)
 	FAudioDeviceData GetActiveInputDevice();
 
 	/*
 	 Gets Current Active Output device
 	*/
-	UFUNCTION(BlueprintPure, Category = "Vivox|Device", meta = (Keywords = "Output Device"), BlueprintCosmetic)
+	UFUNCTION(BlueprintPure, Category = "Vivox|Device", meta = (Keywords = "Output Device", ReturnDisplayName = "AudioDevice"), BlueprintCosmetic)
 	FAudioDeviceData GetActiveOutputDevice();
 
 	/*
@@ -210,37 +210,37 @@ public:
 	/*
 	 Gets Default Communication Input device
 	*/
-	UFUNCTION(BlueprintPure, Category = "Vivox|Device", meta = (Keywords = "Input Device Communication"), BlueprintCosmetic)
+	UFUNCTION(BlueprintPure, Category = "Vivox|Device", meta = (Keywords = "Input Device Communication", ReturnDisplayName = "AudioDevice"), BlueprintCosmetic)
 	FAudioDeviceData GetInputCommunicationDevice();
 
 	/*
 	 Gets Default Communication Output device
 	*/
-	UFUNCTION(BlueprintPure, Category = "Vivox|Device", meta = (Keywords = "Output Device Communication"), BlueprintCosmetic)
+	UFUNCTION(BlueprintPure, Category = "Vivox|Device", meta = (Keywords = "Output Device Communication", ReturnDisplayName = "AudioDevice"), BlueprintCosmetic)
 	FAudioDeviceData GetOutputCommunicationDevice();
 
 	/*
 	 Gets the Effective Device ,If the active device is set to SystemDevice or CommunicationDevice, then the effective device shows the actual device used.If the active device is set to NullDevice or a physical device no longer connected to the system, then no device is effectively in use, and NullDevice is returned. If the active device is set to a specific physical device which is still connected to the system, then that device will be returned.
 	*/
-	UFUNCTION(BlueprintPure, Category = "Vivox|Device", meta = (Keywords = "Input Device Effective"), BlueprintCosmetic)
+	UFUNCTION(BlueprintPure, Category = "Vivox|Device", meta = (Keywords = "Input Device Effective", ReturnDisplayName = "AudioDevice"), BlueprintCosmetic)
 	FAudioDeviceData GetInputEffectiveDevice();
 
 	/*
 	  Gets the Effective Device ,If the active device is set to SystemDevice or CommunicationDevice, then the effective device shows the actual device used.If the active device is set to NullDevice or a physical device no longer connected to the system, then no device is effectively in use, and NullDevice is returned. If the active device is set to a specific physical device which is still connected to the system, then that device will be returned.
 	*/
-	UFUNCTION(BlueprintPure, Category = "Vivox|Device", meta = (Keywords = "Output Device Effective"), BlueprintCosmetic)
+	UFUNCTION(BlueprintPure, Category = "Vivox|Device", meta = (Keywords = "Output Device Effective", ReturnDisplayName = "AudioDevice"), BlueprintCosmetic)
 	FAudioDeviceData GetOutputEffectiveDevice();
 
 	/*
 	 Gets All Available Input devices
 	*/
-	UFUNCTION(BlueprintPure, Category = "Vivox|Device", meta = (Keywords = "Input Device"), BlueprintCosmetic)
+	UFUNCTION(BlueprintPure, Category = "Vivox|Device", meta = (Keywords = "Input Device", ReturnDisplayName = "AudioDevices"), BlueprintCosmetic)
 	TMap<FString,FAudioDeviceData> GetAvailableInputDevices();
 
 	/*
 	 Gets Default Communication Output device
 	*/
-	UFUNCTION(BlueprintPure, Category = "Vivox|Device", meta = (Keywords = "Output Device"), BlueprintCosmetic)
+	UFUNCTION(BlueprintPure, Category = "Vivox|Device", meta = (Keywords = "Output Device", ReturnDisplayName = "AudioDevices"), BlueprintCosmetic)
 	TMap<FString, FAudioDeviceData> GetAvailableOutputDevices();
 
 	//Transmission Mode Functions

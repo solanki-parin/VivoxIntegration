@@ -75,13 +75,13 @@ public:
 	/*
 	  Get SessionId of current channel
 	*/
-	UFUNCTION(BlueprintPure, Category = "Vivox|VoiceChannel", meta= (Keywords = "Id Session Channel"), BlueprintCosmetic)
+	UFUNCTION(BlueprintPure, Category = "Vivox|VoiceChannel", meta= (Keywords = "Id Session Channel", ReturnDisplayName = "ChannelSessionId"), BlueprintCosmetic)
 	FString GetChannelSessionId() { return CurrentChannelSessionId; };
 
 	/*
 	  Get connection state of current channel
 	*/
-	UFUNCTION(BlueprintPure, Category = "Vivox|VoiceChannel",BlueprintCosmetic)
+	UFUNCTION(BlueprintPure, meta = (Keywords = "Channel", ReturnDisplayName = "ConnectionState"),Category = "Vivox|VoiceChannel",BlueprintCosmetic)
 	ConnectionState GetChannelConnectionState();
 
 	/*
@@ -89,7 +89,7 @@ public:
 	  @param bListenAudio True to add audio, false to remove audio.
 	  @param bTransmitAudio When audio is added, transmit only into this channel. This overrides and changes the TransmissionMode set in ILoginSession. If transmission is specifically set to this channel, then when audio is removed, TransmissionMode changes to "None".
 	*/
-	UFUNCTION(BlueprintCallable, Category = "Vivox|VoiceChannel", meta = (Keywords = "Audio Listen Transmition"), BlueprintCosmetic)
+	UFUNCTION(BlueprintCallable, Category = "Vivox|VoiceChannel", meta = (Keywords = "Audio Listen Transmission"), BlueprintCosmetic)
 	void SetAudioConnected(bool bListenAudio=true,bool bTransmitAudio=true);
 
 	void JoinChannel(FString ChannelId, EVivoxChannelType ChannelType , FOnVivoxChannelJoined OnChannelJoined, bool bConnectAudio = true, bool bTransmitAudio = true);
@@ -118,7 +118,7 @@ public:
 	void UpdateVivox3dPosition(const FVector& position, const FVector& ForwardVector, const FVector& UpVector);
 
 	//Used to check if currently speaking to channel or not 
-	UFUNCTION(BlueprintPure, Category = "Vivox|VoiceChannel")
+	UFUNCTION(BlueprintPure, meta = (ReturnDisplayName = "IsSpeaking"),Category = "Vivox|VoiceChannel")
 	bool IsSpeakingToChannel(double& AudioEnergy) const;
 
 };

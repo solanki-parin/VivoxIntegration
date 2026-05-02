@@ -30,23 +30,30 @@ void UVivoxSubSystem::UnInitializeVivox()
 
 //Vivox Login Functions
 
-void UVivoxSubSystem::Login(FOnVivoxLoggedIn OnLogin)
+void UVivoxSubSystem::Login(FString PlayerName,FOnVivoxLoggedIn OnLogin)
 {
-	check(Credentials.Domain != "" && Credentials.Server != "" && Credentials.TokenIssuer != "" && Credentials.TokenKey != "");
+	check(Credentials.Domain != "" && Credentials.Server != "" && Credentials.TokenIssuer != "" && Credentials.TokenKey != "" && PlayerName != "");
 
-	FString Useruuid = UVivoxHelperLibrary::GenerateUUID();
-	LoggedInUserId = AccountId(Credentials.TokenIssuer, Useruuid, Credentials.Domain);
-	ILoginSession& LoginSessionVivox(VivoxVoiceClient->GetLoginSession(LoggedInUserId));
-	LoginSession = &LoginSessionVivox;
-	FTimespan TokenExpiration = FTimespan::FromSeconds(180);
-	FString LoginToken = LoginSession->GetLoginToken(Credentials.TokenKey, TokenExpiration);
-	ILoginSession::FOnBeginLoginCompletedDelegate OnBeginLoginCompleted;
-	OnBeginLoginCompleted.BindLambda([this, OnLogin,&LoginSessionVivox](VivoxCoreError Error)
-		{
-			bIsLoggedIn = (Error == 0) ? true : false;
-			OnLogin.ExecuteIfBound(Error==0);
-		});
-	LoginSession->BeginLogin(Credentials.Server, LoginToken, OnBeginLoginCompleted);
+	if (Credentials.Domain != "" && Credentials.Server != "" && Credentials.TokenIssuer != "" && Credentials.TokenKey != "" && PlayerName != "")
+	{
+		FString Useruuid = PlayerName + UVivoxHelperLibrary::GenerateUUID();
+		LoggedInUserId = AccountId(Credentials.TokenIssuer, Useruuid, Credentials.Domain);
+		ILoginSession& LoginSessionVivox(VivoxVoiceClient->GetLoginSession(LoggedInUserId));
+		LoginSession = &LoginSessionVivox;
+		FTimespan TokenExpiration = FTimespan::FromSeconds(180);
+		FString LoginToken = LoginSession->GetLoginToken(Credentials.TokenKey, TokenExpiration);
+		ILoginSession::FOnBeginLoginCompletedDelegate OnBeginLoginCompleted;
+		OnBeginLoginCompleted.BindLambda([this, OnLogin, &LoginSessionVivox](VivoxCoreError Error)
+			{
+				bIsLoggedIn = (Error == 0) ? true : false;
+				OnLogin.ExecuteIfBound(Error == 0);
+			});
+		LoginSession->BeginLogin(Credentials.Server, LoginToken, OnBeginLoginCompleted);
+	}
+	else
+	{
+		UE_LOG(LogVivox, Error, TEXT("Provided credentials or player name are empty cannot perform vivox action"));
+	}
 }
 
 void UVivoxSubSystem::Logout()
@@ -104,59 +111,66 @@ void UVivoxSubSystem::CreateAndJoinVoiceChannel(FString ChannelSessionId, EVivox
 {
 	check(ChannelSessionId != "" && Credentials.Domain != "" && Credentials.TokenIssuer != "" && Credentials.TokenKey != "");
 
-	if (LoggedInUserId.IsValid() && bIsLoggedIn)
+	if (ChannelSessionId != "" && Credentials.Domain != "" && Credentials.TokenIssuer != "" && Credentials.TokenKey != "")
 	{
-		UVivoxChannelObject* VivoxChObj = nullptr;
-		switch (ChannelType)
+		if (LoggedInUserId.IsValid() && bIsLoggedIn)
 		{
-		case EVivoxChannelType::Positional:
-			if (PositionalChannels.Contains(ChannelSessionId))
+			UVivoxChannelObject* VivoxChObj = nullptr;
+			switch (ChannelType)
 			{
-				VivoxChObj = PositionalChannels[ChannelSessionId];
-				VivoxChObj->JoinChannel(ChannelSessionId, ChannelType, OnChannelJoined, bConnectAudio, bTransmitAudio);
+			case EVivoxChannelType::Positional:
+				if (PositionalChannels.Contains(ChannelSessionId))
+				{
+					VivoxChObj = PositionalChannels[ChannelSessionId];
+					VivoxChObj->JoinChannel(ChannelSessionId, ChannelType, OnChannelJoined, bConnectAudio, bTransmitAudio);
+				}
+				else
+				{
+					VivoxChObj = NewObject<UVivoxChannelObject>(GetGameInstance());
+					VivoxChObj->JoinChannel(ChannelSessionId, ChannelType, OnChannelJoined, bConnectAudio, bTransmitAudio);
+					PositionalChannels.Add(ChannelSessionId, VivoxChObj);
+				}
+				break;
+			case EVivoxChannelType::NonPositional:
+				if (NonPostionalChannels.Contains(ChannelSessionId))
+				{
+					VivoxChObj = NonPostionalChannels[ChannelSessionId];
+					VivoxChObj->JoinChannel(ChannelSessionId, ChannelType, OnChannelJoined, bConnectAudio, bTransmitAudio);
+				}
+				else
+				{
+					VivoxChObj = NewObject<UVivoxChannelObject>(GetGameInstance());
+					VivoxChObj->JoinChannel(ChannelSessionId, ChannelType, OnChannelJoined, bConnectAudio, bTransmitAudio);
+					NonPostionalChannels.Add(ChannelSessionId, VivoxChObj);
+				}
+				break;
+			case EVivoxChannelType::Echo:
+				if (EchoChannels.Contains(ChannelSessionId))
+				{
+					VivoxChObj = EchoChannels[ChannelSessionId];
+					VivoxChObj->JoinChannel(ChannelSessionId, ChannelType, OnChannelJoined, bConnectAudio, bTransmitAudio);
+				}
+				else
+				{
+					VivoxChObj = NewObject<UVivoxChannelObject>(GetGameInstance());
+					VivoxChObj->JoinChannel(ChannelSessionId, ChannelType, OnChannelJoined, bConnectAudio, bTransmitAudio);
+					EchoChannels.Add(ChannelSessionId, VivoxChObj);
+				}
+				break;
+			default:
+				break;
 			}
-			else
-			{
-				VivoxChObj = NewObject<UVivoxChannelObject>(GetGameInstance());
-				VivoxChObj->JoinChannel(ChannelSessionId, ChannelType, OnChannelJoined, bConnectAudio, bTransmitAudio);
-				PositionalChannels.Add(ChannelSessionId, VivoxChObj);
-			}
-			break;
-		case EVivoxChannelType::NonPositional:
-			if (NonPostionalChannels.Contains(ChannelSessionId))
-			{
-				VivoxChObj = NonPostionalChannels[ChannelSessionId];
-				VivoxChObj->JoinChannel(ChannelSessionId, ChannelType, OnChannelJoined, bConnectAudio, bTransmitAudio);
-			}
-			else
-			{
-				VivoxChObj = NewObject<UVivoxChannelObject>(GetGameInstance());
-				VivoxChObj->JoinChannel(ChannelSessionId, ChannelType, OnChannelJoined, bConnectAudio, bTransmitAudio);
-				NonPostionalChannels.Add(ChannelSessionId, VivoxChObj);
-			}
-			break;
-		case EVivoxChannelType::Echo:
-			if (EchoChannels.Contains(ChannelSessionId))
-			{
-				VivoxChObj = EchoChannels[ChannelSessionId];
-				VivoxChObj->JoinChannel(ChannelSessionId, ChannelType, OnChannelJoined, bConnectAudio, bTransmitAudio);
-			}
-			else
-			{
-				VivoxChObj = NewObject<UVivoxChannelObject>(GetGameInstance());
-				VivoxChObj->JoinChannel(ChannelSessionId, ChannelType, OnChannelJoined, bConnectAudio, bTransmitAudio);
-				EchoChannels.Add(ChannelSessionId, VivoxChObj);
-			}
-			break;
-		default:
-			break;
+			ChannelObject = VivoxChObj;
 		}
-		ChannelObject = VivoxChObj;
+		else
+		{
+			UE_LOG(LogVivox, Error, TEXT("Cannot create voice channel, because not logged in to vivox try login first"));
+			OnChannelJoined.ExecuteIfBound(false);
+		}
 	}
 	else
 	{
-		UE_LOG(LogVivox, Error, TEXT("Cannot create voice channel, because not logged in to vivox try login first"));
-		OnChannelJoined.ExecuteIfBound(false);
+		UE_LOG(LogVivox, Error, TEXT("Provided credentials or ChannelSessionId are empty cannot perform vivox action"));
 	}
 }
 

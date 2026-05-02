@@ -225,11 +225,15 @@ Mute / unmute input (microphone).
 
 ### `GetOutputDeviceVoiceState()`
 
+![Device](Resources/GetOutputDeviceVoiceState.png)
+
 Returns output mute state.
 
 ---
 
 ### `GetInputDeviceVoiceState()`
+
+![Device](Resources/GetInputDeviceVoiceState.png)
 
 Returns input mute state.
 
@@ -239,11 +243,15 @@ Returns input mute state.
 
 **Range**: 0 – 100
 
+![Device](Resources/SetOutputDeviceVolume.png)
+
 ---
 
 ### `SetInputDeviceVolume(int32 Volume)`
 
 **Range**: 0 – 100
+
+![Device](Resources/SetInputDeviceVolume.png)
 
 ---
 
@@ -251,21 +259,29 @@ Returns input mute state.
 
 Stops audio capture.
 
+![Device](Resources/SetInputDevicetoNone.png)
+
 ---
 
 ### `SetOutputDeviceToNone()`
 
 Stops audio playback.
 
+![Device](Resources/SetOutputDeviceToNone.png)
+
 ---
 
 ### `GetActiveInputDevice()`
+
+![Device](Resources/GetActiveInputDevice.png)
 
 Returns current input device.
 
 ---
 
 ### `GetActiveOutputDevice()`
+
+![Device](Resources/GetActiveOutputDevice.png)
 
 Returns current output device.
 
@@ -275,11 +291,15 @@ Returns current output device.
 
 Sets microphone device.
 
+![Device](Resources/SetActiveInputDevice.png)
+
 ---
 
 ### `SetActiveOutputDevice(FAudioDeviceData DeviceData)`
 
 Sets speaker device.
+
+![Device](Resources/SetActiveOutputDevice.png)
 
 ---
 
@@ -287,11 +307,15 @@ Sets speaker device.
 
 Returns system communication input device.
 
+![Device](Resources/GetInputCommunicationDevice.png)
+
 ---
 
 ### `GetOutputCommunicationDevice()`
 
 Returns system communication output device.
+
+![Device](Resources/GetOutputCommunicationDevice.png)
 
 ---
 
@@ -299,11 +323,15 @@ Returns system communication output device.
 
 Returns actual device used after resolution.
 
+![Device](Resources/GetOutputCommunicationDevice.png)
+
 ---
 
 ### `GetOutputEffectiveDevice()`
 
 Returns actual output device used.
+
+![Device](Resources/GetOutputEffectiveDevice.png)
 
 ---
 
@@ -311,11 +339,15 @@ Returns actual output device used.
 
 Returns all detected input devices.
 
+![Device](Resources/GetAvailableInputDevices.png)
+
 ---
 
 ### `GetAvailableOutputDevices()`
 
 Returns all detected output devices.
+
+![Device](Resources/GetAvailableOutputDevices.png)
 
 ---
 
@@ -325,22 +357,25 @@ Returns all detected output devices.
 
 ### `SetTransmissionToNone()`
 
-**Description**
-Listen-only mode (no speaking).
+Listen only mode (no speaking).
+
+![Transmission](Resources/SetTransmissionToNone.png)
 
 ---
 
 ### `SetTransmissionToSingleChannel(UVivoxChannelObject* ChannelObject)`
 
-**Description**
-Transmit only to one channel.
+Transmit only to one channel(provided channel).
+
+![Transmission](Resources/SetTransmissionToSingleChannel.png)
 
 ---
 
 ### `SetTransmissionToAll()`
 
-**Description**
 Transmit to all joined channels.
+
+![Transmission](Resources/SetTransmissionToAll.png)
 
 ---
 
@@ -363,13 +398,9 @@ Handles:
 
 ---
 
-### `GetChannel()`
-
-Returns internal `ChannelId`.
-
----
-
 ### `GetChannelSessionId()`
+
+![Channel](Resources/GetChannelSessionId.png)
 
 Returns channel identifier string.
 
@@ -377,13 +408,14 @@ Returns channel identifier string.
 
 ### `GetChannelConnectionState()`
 
+![Channel](Resources/GetChannelConnectionState.png)
+
 Returns Vivox connection state.
 
 ---
 
 ### `SetAudioConnected(bool bListenAudio, bool bTransmitAudio)`
 
-**Description**
 Controls listening and speaking state.
 
 **Behavior**
@@ -391,24 +423,15 @@ Controls listening and speaking state.
 * Can override Vivox transmission mode
 * Disabling audio resets transmission
 
----
-
-### `JoinChannel(...)`
-
-Internal join logic.
-
-**Parameters**
-
-* ChannelId
-* ChannelType
-* Callback
-* Audio flags
+![Channel](Resources/SetAudioConnected.png)
 
 ---
 
 ### `LeaveChannel()`
 
 Leaves channel and destroys object.
+
+![Channel](Resources/LeaveChannel.png)
 
 ---
 
@@ -434,17 +457,7 @@ Updates 3D spatial position for positional channels.
 * Call every tick (or when movement changes)
 * Uses cached dirty system for optimization
 
----
-
-### `Get3DValuesAreDirty()`
-
-Returns whether transform changed.
-
----
-
-### `Clear3DValuesAreDirty()`
-
-Resets dirty state.
+![Channel](Resources/UpdateVivox3dPosition.png)
 
 ---
 
@@ -454,73 +467,7 @@ Resets dirty state.
 
 ### `IsSpeakingToChannel(double& AudioEnergy)`
 
-**Description**
 Checks if user is currently speaking.
 
-**Returns**
+![Channel](Resources/IsSpeakingToChannel.png)
 
-* `bool` → Speaking state
-* `AudioEnergy` → Voice intensity
-
----
-
-# 🖼️ Screenshots
-
-```
-Images/
- ├── voice_ui.png
- ├── positional_debug.png
- └── device_settings.png
-```
-
----
-
-# ⚙️ Setup
-
-1. Enable Vivox plugin
-2. Add dependency:
-
-```cpp
-PublicDependencyModuleNames.AddRange(new string[] { "VivoxCore" });
-```
-
-3. Wrap code:
-
-```cpp
-#if WITH_VIVOX
-```
-
----
-
-# 💻 Example Usage
-
-```cpp
-Vivox->SetVivoxCredentials(Creds);
-Vivox->InitializeVivox();
-
-Vivox->Login(OnLogin);
-
-Vivox->CreateAndJoinVoiceChannel(
-    "Global",
-    EVivoxChannelType::NonPositional,
-    OnJoined,
-    Channel,
-    true,
-    true
-);
-```
-
----
-
-# 📈 Future Extensions
-
-* Player mute system
-* UI voice indicators
-* Channel priority
-* Push-to-talk system
-
----
-
-# 📄 License
-
-© 2025 SPD78
